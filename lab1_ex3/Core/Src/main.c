@@ -54,7 +54,63 @@ static void MX_GPIO_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+/*Private function-----------------------------------------------------------*/
+/*toggle port*/
+void toggle_port(GPIO_TypeDef *port, uint16_t pin)
+{
+	HAL_GPIO_TogglePin(port, pin);
+}
 
+/*Public function------------------------------------------------------------*/
+/*run traffic light counter*/
+void run_traffic_light(TRAFFIC_LIGHT *light, STATE *light_state)
+{
+	  switch (*light_state)
+	  {
+	  case red:
+		  if (light->red_time == 0)
+		  {
+			  toggle_port(light->LED_RED_Port, light->LED_RED_Pin);
+			  *light_state = green;
+			  light->green_time = GREEN;
+			  toggle_port(light->LED_GREEN_Port, light->LED_GREEN_Pin);
+		  }
+		  else
+		  {
+			  light->red_time--;
+			  break;
+		  }
+
+	  case green:
+		  if (light->green_time == 0)
+		  {
+			  toggle_port(light->LED_GREEN_Port, light->LED_GREEN_Pin);
+			  *light_state = yellow;
+			  light->yellow_time = YELLOW;
+			  toggle_port(light->LED_YELLOW_Port, light->LED_YELLOW_Pin);
+		  }
+		  else
+		  {
+			  light->green_time--;
+			  break;
+		  }
+	  case yellow:
+		  if (light->yellow_time == 0)
+		  {
+			  toggle_port(light->LED_YELLOW_Port, light->LED_YELLOW_Pin);
+			  *light_state = red;
+			  light->red_time = RED;
+			  toggle_port(light->LED_RED_Port, light->LED_RED_Pin);
+		  }
+		  else
+		  {
+			  light->yellow_time--;
+			  break;
+		  }
+	  default:
+		  light->red_time--;
+	  }
+}
 /* USER CODE END 0 */
 
 /**
@@ -91,10 +147,51 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  TRAFFIC_LIGHT v_light, h_light;
+  STATE v_light_state = red, h_light_state = green;
+
+  HAL_GPIO_WritePin(V_RED_GPIO_Port, V_RED_Pin, RESET);
+  HAL_GPIO_WritePin(V_YELLOW_GPIO_Port, V_YELLOW_Pin, SET);
+  HAL_GPIO_WritePin(V_GREEN_GPIO_Port, V_GREEN_Pin, SET);
+
+  HAL_GPIO_WritePin(H_RED_GPIO_Port, H_RED_Pin, SET);
+  HAL_GPIO_WritePin(H_YELLOW_GPIO_Port, H_YELLOW_Pin, SET);
+  HAL_GPIO_WritePin(H_GREEN_GPIO_Port, H_GREEN_Pin, RESET);
+
+  v_light.LED_RED_Port = V_RED_GPIO_Port;
+  v_light.LED_YELLOW_Port = V_YELLOW_GPIO_Port;
+  v_light.LED_GREEN_Port = V_GREEN_GPIO_Port;
+  v_light.LED_RED_Pin = V_RED_Pin;
+  v_light.LED_YELLOW_Pin = V_YELLOW_Pin;
+  v_light.LED_GREEN_Pin = V_GREEN_Pin;
+  v_light.red_time = RED;
+  v_light.yellow_time = 0;
+  v_light.green_time = 0;
+
+  h_light.LED_RED_Port = H_RED_GPIO_Port;
+  h_light.LED_YELLOW_Port = H_YELLOW_GPIO_Port;
+  h_light.LED_GREEN_Port = H_GREEN_GPIO_Port;
+  h_light.LED_RED_Pin = H_RED_Pin;
+  h_light.LED_YELLOW_Pin = H_YELLOW_Pin;
+  h_light.LED_GREEN_Pin = H_GREEN_Pin;
+  h_light.red_time = 0;
+  h_light.yellow_time = 0;
+  h_light.green_time = GREEN;
   while (1)
   {
-    /* USER CODE END WHILE */
+	  run_traffic_light(&v_light, &v_light_state);
+	  run_traffic_light(&h_light, &h_light_state);
 
+//	  toggle_port(h_light.LED_GREEN_Port, h_light.LED_GREEN_Pin);
+//	  toggle_port(h_light.LED_RED_Port, h_light.LED_RED_Pin);
+//	  toggle_port(h_light.LED_YELLOW_Port, h_light.LED_YELLOW_Pin);
+
+//	  HAL_GPIO_TogglePin(H_GREEN_GPIO_Port, H_GREEN_Pin);
+//	  HAL_GPIO_TogglePin(H_RED_GPIO_Port, H_RED_Pin);
+//	  HAL_GPIO_TogglePin(H_YELLOW_GPIO_Port, H_YELLOW_Pin);
+
+    /* USER CODE END WHILE */
+	  HAL_Delay(1000);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
