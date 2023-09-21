@@ -69,7 +69,7 @@ void clearAllClock()
 	HAL_GPIO_WritePin(LED_10_GPIO_Port, LED_10_Pin, SET);
 	HAL_GPIO_WritePin(LED_11_GPIO_Port, LED_11_Pin, SET);
 }
-void wakeUp()
+void setAllClock()
 {
 	HAL_GPIO_WritePin(LED_0_GPIO_Port, LED_0_Pin, RESET);
 	HAL_GPIO_WritePin(LED_1_GPIO_Port, LED_1_Pin, RESET);
@@ -126,7 +126,7 @@ int main(void)
 	  if (status == 0)
 		  clearAllClock();
 	  else
-		  wakeUp();
+		  setAllClock();
 	  status = 1 - status;
     /* USER CODE END WHILE */
 	  HAL_Delay(1000);
